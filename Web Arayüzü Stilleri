@@ -322,3 +322,41 @@ footer p {
 }
 
 /* Loading Animation */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Status Indicators */
+.status-online {
+    color: var(--success-color);
+}
+
+.status-offline {
+    color: var(--danger-color);
+}
+
+.dark-indicator {
+    background: rgba(52, 58, 64, 0.8);
+    color: white;
+}
+
+.light-indicator {
+    background: rgba(255, 235, 59, 0.8);
+    color: #333;
+}
+
+/* Smooth transitions for all interactive elements */
+.btn, .brightness-slider, .status-item {
+    transition: var(--transition);
+}
