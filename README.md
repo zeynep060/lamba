@@ -24,28 +24,3 @@ Kullanım:
 Sistemi kullanmak için öncelikle ESP32'ye kodu yükledikten sonra cihazın WiFi bağlantısını kurmanız gerekmektedir. ESP32 "Akilli_Isik" adında bir WiFi ağı oluşturacaktır. Telefonunuzun veya bilgisayarınızın WiFi ayarlarından bu ağı bulup "12345678" şifresi ile bağlanın. Bağlantı kurulduktan sonra tarayıcıyı açıp adres çubuğuna mutlaka "http://192.168.4.1" yazın - burada önemli olan "http" kısmını "https" değil "http" olarak yazmanızdır. Sayfa açıldıktan sonra tüm kontrolleri kullanabilir, LED'leri yönetebilir ve LDR sensörünün durumunu takip edebilirsiniz. Sistem otomatik olarak güncelleneceği için sayfayı yenilemenize gerek yoktur.
 
 LDR Auto tuşu, otomatık yakıp söndürür, diger modlar ise manueldır, örn; aç kapat kıs yükselt gibi.
-
-GELİŞİM SÜRECİMm
-İlk Aşama: Donanım Planlaması
-Projenin başlangıcında, hangi pinlerin hangi bileşenler için kullanılacağı planlandı. ESP32'nin PWM özelliği olan pinleri RGB LED kontrolü için seçildi. LDR modülü için ise dijital giriş pini tercih edildi.
-İkinci Aşama: Yazılım Geliştirme
-Web sunucusu kodu geliştirildi ve modern bir kullanıcı arayüzü tasarlandı. Hocam, özellikle gerçek zamanlı veri güncelleme özelliği eklemek biraz zaman aldı ama sonuçta başarılı olduk.
-Üçüncü Aşama: Test ve Optimizasyon
-Sistem test edildi ve performans optimizasyonları yapıldı. Party modu ve otomatik kontrol özellikleri eklendi.
-PROJE ÖZELLİKLERİ
-Web Arayüzü Öz ellikleri:
-•	Modern ve responsive tasarım
-•	Gerçek zamanlı durum güncellemesi
-•	Mobil cihaz uyumluluğu
-•	Kullanıcı dostu kontrol butonları
-Kontrol Modları:
-1.	Kapalı Mod: LED tamamen kapatılır
-2.	Beyaz Işık: Standart beyaz aydınlatma
-3.	Renkli Modlar: Mavi, kırmızı, yeşil renk seçenekleri
-4.	Party Modu: Otomatik renk geçişli eğlenceli mod
-5.	Otomatik Mod: LDR sensörü ile akıllı kontrol
-Teknik Özellikler:
-•	WiFi Access Point modu
-•	PWM ile parlaklık kontrolü (%1-100)
-•	JSON tabanlı veri iletişimi
-•	Otomatik web sayfası güncelleme
