@@ -2,19 +2,16 @@
 #include <WebServer.h>
 #include <ArduinoJson.h>
 
-// Pin tanimlamalari
 const int redPin = 25;
 const int greenPin = 26;
 const int bluePin = 27;
 const int ldrPin = 2;
 
-// WiFi ayarlari
 const char* ssid = "Akilli_Isik";
 const char* password = "12345678";
 
 WebServer server(80);
 
-// Degiskenler
 int brightness = 50;
 bool autoMode = false;
 String currentMode = "kapali";
@@ -22,55 +19,47 @@ bool partyMode = false;
 unsigned long lastPartyUpdate = 0;
 int partyStep = 0;
 
-// PWM ayarlari
 const int pwmFreq = 5000;
 const int pwmResolution = 8;
 
 void setup() {
   Serial.begin(115200);
-  
-  // PWM kanallarini ayarla
+
   ledcAttach(redPin, pwmFreq, pwmResolution);
   ledcAttach(greenPin, pwmFreq, pwmResolution);
   ledcAttach(bluePin, pwmFreq, pwmResolution);
-  
-  // LDR pin ayari
+
   pinMode(ldrPin, INPUT);
-  
-  // LED'i kapat
+
   setColor(0, 0, 0);
-  
-  // WiFi AP modunu baslat
+
   WiFi.softAP(ssid, password);
   Serial.println("WiFi AP baslatildi");
   Serial.print("IP adresi: ");
   Serial.println(WiFi.softAPIP());
-  
-  // Web sunucu yollarini ayarla
+
   server.on("/", handleRoot);
   server.on("/status", handleStatus);
   server.on("/control", HTTP_POST, handleControl);
-  
+
   server.begin();
   Serial.println("Web sunucu baslatildi");
 }
 
 void loop() {
   server.handleClient();
-  
-  // Party modu kontrolu
+
   if (partyMode && currentMode == "party") {
     if (millis() - lastPartyUpdate > 500) {
       partyAnimation();
       lastPartyUpdate = millis();
     }
   }
-  
-  // Auto mod kontrolu
+
   if (autoMode) {
     checkAutoMode();
   }
-  
+
   delay(10);
 }
 
@@ -78,7 +67,7 @@ void setColor(int red, int green, int blue) {
   int r = map(red * brightness, 0, 25500, 0, 255);
   int g = map(green * brightness, 0, 25500, 0, 255);
   int b = map(blue * brightness, 0, 25500, 0, 255);
-  
+
   ledcWrite(redPin, r);
   ledcWrite(greenPin, g);
   ledcWrite(bluePin, b);
@@ -86,20 +75,20 @@ void setColor(int red, int green, int blue) {
 
 void partyAnimation() {
   switch(partyStep) {
-    case 0: setColor(255, 0, 0); break;     // Kirmizi
-    case 1: setColor(255, 127, 0); break;   // Turuncu
-    case 2: setColor(255, 255, 0); break;   // Sari
-    case 3: setColor(0, 255, 0); break;     // Yesil
-    case 4: setColor(0, 0, 255); break;     // Mavi
-    case 5: setColor(75, 0, 130); break;    // Indigo
-    case 6: setColor(148, 0, 211); break;   // Mor
+    case 0: setColor(255, 0, 0); break;
+    case 1: setColor(255, 127, 0); break;
+    case 2: setColor(255, 255, 0); break;
+    case 3: setColor(0, 255, 0); break;
+    case 4: setColor(0, 0, 255); break;
+    case 5: setColor(75, 0, 130); break;
+    case 6: setColor(148, 0, 211); break;
   }
   partyStep = (partyStep + 1) % 7;
 }
 
 void checkAutoMode() {
   bool isDark = digitalRead(ldrPin) == HIGH;
-  
+
   if (isDark && currentMode != "beyaz") {
     currentMode = "beyaz";
     setColor(255, 255, 255);
@@ -235,13 +224,13 @@ void handleRoot() {
 <body>
     <div class='container'>
         <h1>💡 Akilli Isik</h1>
-        
+
         <div class='status-card'>
             <h3>Durum</h3>
             <div id='current-mode'>Mod: <span id='mode-text'>Yukleniyor...</span></div>
             <div class='ldr-status' id='ldr-status'>Ortam: Yukleniyor...</div>
         </div>
-        
+
         <div class='control-grid'>
             <button class='btn btn-off' onclick='setMode("kapali")'>🔴 Kapat</button>
             <button class='btn btn-white' onclick='setMode("beyaz")'>⚪ Beyaz</button>
@@ -251,7 +240,7 @@ void handleRoot() {
             <button class='btn btn-party' onclick='setMode("party")'>🎉 Party</button>
             <button class='btn btn-auto' id='auto-btn' onclick='toggleAuto()'>🤖 LDR Auto</button>
         </div>
-        
+
         <div class='brightness-control'>
             <label class='brightness-label'>Parlaklik Kontrolu</label>
             <input type='range' min='1' max='100' value='50' class='brightness-slider' id='brightness'>
@@ -262,23 +251,20 @@ void handleRoot() {
     <script>
         let currentStatus = {};
         let isUpdating = false;
-        
-        // Brightness slider kontrolu
+
         document.getElementById('brightness').addEventListener('input', function() {
             if (!isUpdating) {
                 document.getElementById('brightness-value').textContent = this.value + '%';
                 setBrightness(this.value);
             }
         });
-        
-        // Durum guncelleme
+
         function updateStatus() {
             fetch('/status')
                 .then(response => response.json())
                 .then(data => {
                     currentStatus = data;
-                    
-                    // Mod gosterimi
+
                     let modeText = '';
                     switch(data.mode) {
                         case 'kapali': modeText = '🔴 Kapali'; break;
@@ -289,8 +275,7 @@ void handleRoot() {
                         case 'party': modeText = '🎉 Party'; break;
                     }
                     document.getElementById('mode-text').textContent = modeText;
-                    
-                    // LDR durumu
+
                     const ldrStatus = document.getElementById('ldr-status');
                     if (data.isDark) {
                         ldrStatus.textContent = '🌙 Ortam: Karanlik';
@@ -299,8 +284,7 @@ void handleRoot() {
                         ldrStatus.textContent = '☀️ Ortam: Aydinlik';
                         ldrStatus.className = 'ldr-status light';
                     }
-                    
-                    // Auto buton durumu
+
                     const autoBtn = document.getElementById('auto-btn');
                     if (data.autoMode) {
                         autoBtn.classList.add('active');
@@ -309,8 +293,7 @@ void handleRoot() {
                         autoBtn.classList.remove('active');
                         autoBtn.textContent = '🤖 LDR Auto';
                     }
-                    
-                    // Brightness slider guncelle
+
                     if (!isUpdating) {
                         document.getElementById('brightness').value = data.brightness;
                         document.getElementById('brightness-value').textContent = data.brightness + '%';
@@ -318,7 +301,7 @@ void handleRoot() {
                 })
                 .catch(error => console.error('Hata:', error));
         }
-        
+
         function setMode(mode) {
             fetch('/control', {
                 method: 'POST',
@@ -326,7 +309,7 @@ void handleRoot() {
                 body: JSON.stringify({ action: 'setMode', mode: mode })
             });
         }
-        
+
         function toggleAuto() {
             fetch('/control', {
                 method: 'POST',
@@ -334,7 +317,7 @@ void handleRoot() {
                 body: JSON.stringify({ action: 'toggleAuto' })
             });
         }
-        
+
         function setBrightness(value) {
             isUpdating = true;
             fetch('/control', {
@@ -345,29 +328,28 @@ void handleRoot() {
                 setTimeout(() => { isUpdating = false; }, 100);
             });
         }
-        
-        // Otomatik guncelleme
+
         updateStatus();
         setInterval(updateStatus, 1000);
     </script>
 </body>
 </html>
   )";
-  
+
   server.send(200, "text/html", html);
 }
 
 void handleStatus() {
   DynamicJsonDocument doc(1024);
-  
+
   doc["mode"] = currentMode;
   doc["brightness"] = brightness;
   doc["autoMode"] = autoMode;
   doc["isDark"] = digitalRead(ldrPin) == HIGH;
-  
+
   String response;
   serializeJson(doc, response);
-  
+
   server.send(200, "application/json", response);
 }
 
@@ -375,14 +357,14 @@ void handleControl() {
   if (server.hasArg("plain")) {
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, server.arg("plain"));
-    
+
     String action = doc["action"];
-    
+
     if (action == "setMode") {
       String mode = doc["mode"];
       currentMode = mode;
       partyMode = false;
-      
+
       if (mode == "kapali") {
         setColor(0, 0, 0);
       } else if (mode == "beyaz") {
@@ -399,12 +381,8 @@ void handleControl() {
       }
     } else if (action == "toggleAuto") {
       autoMode = !autoMode;
-      if (!autoMode) {
-        // Auto mod kapandiginda mevcut durumu koru
-      }
     } else if (action == "setBrightness") {
       brightness = doc["brightness"];
-      // Mevcut rengi yeni parlaklikla guncelle
       if (currentMode == "beyaz") {
         setColor(255, 255, 255);
       } else if (currentMode == "mavi") {
@@ -416,6 +394,6 @@ void handleControl() {
       }
     }
   }
-  
+
   server.send(200, "text/plain", "OK");
 }
